@@ -1,6 +1,8 @@
 package com.example.jokeapp
 
 import android.app.Application
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class JokeApp : Application() {
 
@@ -8,6 +10,15 @@ class JokeApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        viewModel = ViewModel(TestModel(BaseResourceManager(this)))
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://www.google.com")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+        viewModel = ViewModel(
+            BaseModel(
+                retrofit.create(JokeService::class.java),
+                BaseResourceManager(this)
+            )
+        )
     }
 }
