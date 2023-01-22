@@ -1,13 +1,21 @@
 package com.example.jokeapp
 
 class ViewModel(private val model: Model) {
-    private var callback: TextCallback? = null
+    private var callback: DataCallback? = null
 
-    fun init(callback: TextCallback) {
+    fun init(callback: DataCallback) {
         this.callback = callback
         model.init(object : ResultCallBack {
-            override fun provideSuccess(data: Joke) = callback.provideText(data.getJokeUI())
-            override fun provideError(error: JokeFailure) = callback.provideText(error.getMessage())
+            override fun provideSuccess(data: Joke) {
+                callback.provideText(data.getJokeUI())
+                callback.provideIconRes(data.getIconResId())
+            }
+
+            override fun provideError(error: JokeFailure) {
+                val joke = FailedJoke(error.getMessage())
+                callback.provideText(joke.getJokeUI())
+                callback.provideIconRes(joke.getIconResId())
+            }
         })
     }
 
