@@ -4,42 +4,28 @@ import retrofit2.Call
 import retrofit2.Response
 import java.net.UnknownHostException
 
-class BaseModel(
-    private val jokeService: JokeService,
-    private val resourceManager: BaseResourceManager
-) : Model {
+class BaseCloudDataSource(private val jokeService: JokeService) : CloudDataSource {
 
-    private var callback: ResultCallBack? = null
-    private val noConnection by lazy { NoConnection(resourceManager) }
-    private val serviceUnavailable by lazy { ServiceUnavailable(resourceManager) }
-
-
-    override fun getJoke() {
-        jokeService.getJoke().enqueue(object : retrofit2.Callback<JokeDTO> {
-            override fun onResponse(call: Call<JokeDTO>, response: Response<JokeDTO>) {
+    override fun getJoke(callback: JokeCloudCallback) {
+        jokeService.getJoke().enqueue(object : retrofit2.Callback<JokeServerModel> {
+            override fun onResponse(
+                call: Call<JokeServerModel>,
+                response: Response<JokeServerModel>
+            ) {
                 if (response.isSuccessful) {
-                    callback?.provideSuccess(response.body()!!.toJoke())
+                    callback.provide(response.body()!!)
                 } else {
-                    callback?.provideError(serviceUnavailable)
+                    callback.fail(ErrorType.SERVICE_UNAVAILABLE)
                 }
             }
 
-            override fun onFailure(call: Call<JokeDTO>, t: Throwable) {
+            override fun onFailure(call: Call<JokeServerModel>, t: Throwable) {
                 if (t is UnknownHostException) {
-                    callback?.provideError(noConnection)
+                    callback.fail(ErrorType.NO_CONNECTION)
                 } else {
-                    callback?.provideError(serviceUnavailable)
+                    callback.fail(ErrorType.SERVICE_UNAVAILABLE)
                 }
             }
         })
     }
-
-    override fun init(callback: ResultCallBack) {
-        this.callback = callback
-    }
-
-    override fun clear() {
-        callback = null
-    }
-
 }

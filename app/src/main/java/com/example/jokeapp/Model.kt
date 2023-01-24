@@ -4,7 +4,7 @@ interface Model {
 
     fun getJoke()
 
-    fun init(callback: ResultCallBack)
+    fun init(callback: JokeCallback)
 
     fun clear()
 

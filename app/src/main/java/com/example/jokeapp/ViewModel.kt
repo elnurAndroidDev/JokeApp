@@ -1,20 +1,15 @@
 package com.example.jokeapp
 
 class ViewModel(private val model: Model) {
-    private var callback: DataCallback? = null
+    private var dataCallback: DataCallback? = null
 
     fun init(callback: DataCallback) {
-        this.callback = callback
-        model.init(object : ResultCallBack {
-            override fun provideSuccess(data: Joke) {
-                callback.provideText(data.getJokeUI())
-                callback.provideIconRes(data.getIconResId())
-            }
-
-            override fun provideError(error: JokeFailure) {
-                val joke = FailedJoke(error.getMessage())
-                callback.provideText(joke.getJokeUI())
-                callback.provideIconRes(joke.getIconResId())
+        this.dataCallback = callback
+        model.init(object : JokeCallback {
+            override fun provide(joke: Joke) {
+                dataCallback?.let {
+                    joke.map(it)
+                }
             }
         })
     }
@@ -24,7 +19,7 @@ class ViewModel(private val model: Model) {
     }
 
     fun clear() {
-        callback = null
+        dataCallback = null
         model.clear()
     }
 }

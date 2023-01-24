@@ -20,4 +20,9 @@ abstract class Joke(private val text: String, private val punchline: String) {
 
     @DrawableRes
     abstract fun getIconResId(): Int
+
+    fun map(callback: DataCallback) = callback.run {
+        provideText(getJokeUI())
+        provideIconRes(getIconResId())
+    }
 }
